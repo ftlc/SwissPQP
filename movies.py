@@ -37,7 +37,7 @@ X_train_count = count_vect.fit_transform(X_train)
 tfidf_transformer = TfidfTransformer()
 X_train_tfidf = tfidf_transformer.fit_transform(X_train_count)
 
-pca = PCA(n_components=30)
+pca = PCA(n_components=20)
 X_train_array = X_train_tfidf.toarray()
 pca.fit(X_train_array)
 
