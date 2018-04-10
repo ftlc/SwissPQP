@@ -15,6 +15,7 @@ Setting up Python Virtual Environment (to avoid issues with different environmen
 2. Activate the virtual environment
   ```
   source venv/bin/activate
+  venv\Scripts\activate.bat -> for windows
   ```
 
   This gives us a localized environment with only the local packages installed. By default python packages installed globally are not available in the venv
