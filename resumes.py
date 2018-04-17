@@ -34,36 +34,37 @@ X_train_count = count_vect.fit_transform(X_train)
 tfidf_transformer = TfidfTransformer()
 X_train_tfidf = tfidf_transformer.fit_transform(X_train_count)
 
-svd = TruncatedSVD(n_components=20)
-svd.fit(X_train_tfidf)
-print("svd explained variance: {}".format(svd.explained_variance_.sum()))
-x_train_svd = svd.transform(X_train_tfidf)
+#svd = TruncatedSVD(n_components=20)
+#svd.fit(X_train_tfidf)
+#print("svd explained variance: {}".format(svd.explained_variance_.sum()))
+#x_train_svd = svd.transform(X_train_tfidf)
 
 # Test data transformations
 X_test_count = count_vect.transform(X_test)
 X_tfidf_test = tfidf_transformer.transform(X_test_count)
-x_test_svd = svd.transform(X_tfidf_test)
+#x_test_svd = svd.transform(X_tfidf_test)
 
-clf = RandomForestClassifier()
 
-parameters_rand = {
-    "n_estimators": sp_randint(300, 2000),
-    "max_depth": [3, None],
-    "max_features": sp_randint(1, 11),
-    "min_samples_split": sp_randint(2, 11),
-    "min_samples_leaf": sp_randint(1, 11),
-    "bootstrap": [True, False],
-    "criterion": ["gini", "entropy"]
-}
+params = {'bootstrap': False,
+    'criterion': 'entropy',
+    'max_depth': None,
+    'max_features': 5,
+    'min_samples_leaf': 1,
+    'min_samples_split': 2,
+    'n_estimators': 457}
 
-n_iter_search = 40
-random_search = RandomizedSearchCV(clf, param_distributions=parameters_rand,
-                                   n_iter=n_iter_search,
-                                   n_jobs=-1)
+params = {'bootstrap': True,
+    'criterion': 'entropy',
+    'max_depth': 3,
+    'max_features': 5,
+    'min_samples_leaf': 1,
+    'min_samples_split': 2,
+    'n_estimators': 457}
 
-random_search.fit(x_train_svd, y_train)
-predicted = random_search.predict(x_test_svd)
-print("Parameters: {}".format(random_search.best_params_))
+
+clf = RandomForestClassifier(**params)
+clf.fit(X_train_tfidf, y_train)
+predicted = clf.predict(X_tfidf_test)
 
 
 print("Classifier accuracy: {}".format(np.mean(predicted == y_test)))
