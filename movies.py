@@ -54,7 +54,7 @@ pipe = Pipeline([
 
 # specify parameters and distributions to sample from
 parameters_rand = {
-    "pca__n_components": sp_randint(10, 50),
+    "pca__n_components": sp_randint(30, 200),
     "clf__n_estimators": sp_randint(300, 2000),
     "clf__min_samples_split": sp_randint(2, 20),
     "clf__min_samples_leaf": sp_randint(2, 20),
