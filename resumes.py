@@ -14,8 +14,30 @@ from sklearn.pipeline import Pipeline
 
 from scipy.stats import randint as sp_randint
 from sklearn.model_selection import RandomizedSearchCV
-
+from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize
 resumedir = 'data/resumes_and_reviews'
+justResume = 'data/resumes_and_reviews/resumes'
+
+
+# Functions for words to remove from the resume to make the prediction harder
+def remove_html_stop_words(sentence):
+    stop_words = ["html_br, html_span"]
+    word_tokens = word_tokenize(sentence)
+    filtered_sentence = [w for w in word_tokens if w not in stop_words]
+    return " ".join(filtered_sentence)
+
+
+def remove_resume_easy_words(sentence):
+    stop_words = ["movie, resume, job"]
+    word_tokens = word_tokenize(sentence)
+    filtered_sentence = [w for w in word_tokens if w not in stop_words]
+    return " ".join(filtered_sentence)
+
+
+# Clean out resumes
+remove_resume_easy_words(justResume)
+remove_html_stop_words(resumedir)
 resumes = load_files(resumedir, shuffle=True)
 
 # Split remainder into training and testing
