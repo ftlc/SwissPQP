@@ -46,9 +46,9 @@ X_train_pca = pca.transform(X_train_array)
 
 # Plot the Principal Components
 plt.figure()
-plt.plot(pca.explained_variance_)
+plt.plot(pca.explained_variance_.cumsum())
 plt.xlabel('number of components')
-plt.ylabel('individual explained variance')
+plt.ylabel('cumulative explained variance')
 plt.show()
 
 # Test data transformations
@@ -80,7 +80,7 @@ random_search.fit(X_train_pca, y_train)
 
 predicted = random_search.predict(X_test_pca)
 
-np.mean(predicted == y_test)
+print(np.mean(predicted == y_test))
 
 
 #  # use a full grid over all parameters
