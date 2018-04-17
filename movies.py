@@ -16,6 +16,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 
+
+from keras.datasets import mnist
+from keras.models import Sequential, Model
+from keras.layers import Dense
+from keras.optimizers import Adam
+
+
 # Import Data
 # Downloaded from http://www.nltk.org/nltk_data/
 moviedir = 'data/movie_reviews/txt_sentoken/'
@@ -37,7 +44,7 @@ X_train_count = count_vect.fit_transform(X_train)
 tfidf_transformer = TfidfTransformer()
 X_train_tfidf = tfidf_transformer.fit_transform(X_train_count)
 
-pca = PCA(n_components=20)
+pca = PCA(n_components=120)
 X_train_array = X_train_tfidf.toarray()
 pca.fit(X_train_array)
 
@@ -46,15 +53,15 @@ X_train_pca = pca.transform(X_train_array)
 
 # Plot the Principal Components
 plt.figure()
-plt.plot(pca.explained_variance_.cumsum())
+plt.plot(pca.explained_variance_)
 plt.xlabel('number of components')
 plt.ylabel('cumulative explained variance')
 plt.show()
 
 # Test data transformations
 X_test_count = count_vect.transform(X_test)
-X_tfidf_test = tfidf_transformer.transform(X_test_count)
-X_test_pca = pca.transform(X_tfidf_test.toarray())
+X_test_tfidf = tfidf_transformer.transform(X_test_count)
+X_test_pca = pca.transform(X_test_tfidf.toarray())
 
 clf = RandomForestClassifier()
 
@@ -82,21 +89,24 @@ predicted = random_search.predict(X_test_pca)
 
 print(np.mean(predicted == y_test))
 
+# AutoEncoder
+ae = Sequential()
+ae.add(Dense(512,  activation='elu', input_shape=(36632,)))
+ae.add(Dense(128,  activation='elu'))
+ae.add(Dense(2,    activation='linear', name="bottleneck"))
+ae.add(Dense(128,  activation='elu'))
+ae.add(Dense(512,  activation='elu'))
+ae.add(Dense(36632,  activation='sigmoid'))
+ae.compile(loss='mean_squared_error', optimizer=Adam())
 
-#  # use a full grid over all parameters
-#  param_grid_grid = {
-    #  "n_estimators": [30, 50],
-    #  "max_depth": [3, None],
-    #  "max_features": [1, 3, 10],
-    #  "min_samples_split": [2, 3, 10],
-    #  "min_samples_leaf": [1, 3, 10],
-    #  "bootstrap": [True, False],
-    #  "criterion": ["gini", "entropy"]
-#  }
 
-#  # run grid search
-#  grid_search = GridSearchCV(clf, param_grid=param_grid_grid, n_jobs=-1)
-#  grid_search.fit(X_train_pca, y_train)
+history = ae.fit(X_train_tfidf, X_train_tfidf, batch_size=128, epochs=5,
+                 verbose=1, validation_data=(X_test_tfidf, X_test_tfidf))
 
-#  predicted_grid = grid_search.predict(X_test_pca)
-#  np.mean(predicted == y_test)
+encoder = Model(ae.input, ae.get_layer('bottleneck').output)
+
+Zenc = encoder.predict(X_train_tfidf)
+Renc = ae.predict(X_train_tfidf)
+
+
+
