@@ -52,11 +52,11 @@ X_train_pca = pca.transform(X_train_array)
 
 
 # Plot the Principal Components
-plt.figure()
-plt.plot(pca.explained_variance_)
-plt.xlabel('number of components')
-plt.ylabel('cumulative explained variance')
-plt.show()
+#  plt.figure()
+#  plt.plot(pca.explained_variance_)
+#  plt.xlabel('number of components')
+#  plt.ylabel('cumulative explained variance')
+#  plt.show()
 
 # Test data transformations
 X_test_count = count_vect.transform(X_test)
@@ -88,7 +88,7 @@ random_search.fit(X_train_pca, y_train)
 predicted = random_search.predict(X_test_pca)
 
 print("PCA with random forest")
-print("Accuracy" + np.mean(predicted == y_test))
+print("Accuracy: {}".format(np.mean(predicted == y_test)))
 
 # AutoEncoder
 
@@ -96,9 +96,9 @@ input_shape = X_train_tfidf.shape[1]
 
 ae = Sequential()
 ae.add(Dense(512,  activation='elu', input_shape=(input_shape,)))
-ae.add(Dense(128,  activation='elu'))
+ae.add(Dense(128,  activation='relu'))
 ae.add(Dense(1,    activation='linear', name="bottleneck"))
-ae.add(Dense(128,  activation='elu'))
+ae.add(Dense(128,  activation='relu'))
 ae.add(Dense(512,  activation='elu'))
 ae.add(Dense(input_shape,  activation='sigmoid', name="out_layer"))
 ae.compile(loss='binary_crossentropy',
