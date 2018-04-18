@@ -19,7 +19,7 @@ from sklearn.model_selection import RandomizedSearchCV
 
 from keras.datasets import mnist
 from keras.models import Sequential, Model
-from keras.layers import Dense
+from keras.layers import Dense, Input
 from keras.optimizers import Adam
 
 
@@ -87,26 +87,45 @@ random_search.fit(X_train_pca, y_train)
 
 predicted = random_search.predict(X_test_pca)
 
-print(np.mean(predicted == y_test))
+print("PCA with random forest")
+print("Accuracy" + np.mean(predicted == y_test))
 
 # AutoEncoder
+
+input_shape = X_train_tfidf.shape[1]
+
 ae = Sequential()
-ae.add(Dense(512,  activation='elu', input_shape=(36632,)))
+ae.add(Dense(512,  activation='elu', input_shape=(input_shape,)))
 ae.add(Dense(128,  activation='elu'))
-ae.add(Dense(2,    activation='linear', name="bottleneck"))
+ae.add(Dense(1,    activation='linear', name="bottleneck"))
 ae.add(Dense(128,  activation='elu'))
 ae.add(Dense(512,  activation='elu'))
-ae.add(Dense(36632,  activation='sigmoid'))
-ae.compile(loss='mean_squared_error', optimizer=Adam())
+ae.add(Dense(input_shape,  activation='sigmoid', name="out_layer"))
+ae.compile(loss='binary_crossentropy',
+           optimizer='adadelta',
+           metrics=['accuracy'])
 
 
-history = ae.fit(X_train_tfidf, X_train_tfidf, batch_size=128, epochs=5,
-                 verbose=1, validation_data=(X_test_tfidf, X_test_tfidf))
+history = ae.fit(X_train_tfidf, X_train_tfidf,
+                 batch_size=128,
+                 epochs=5,
+                 verbose=1,
+                 validation_data=(X_test_tfidf, X_test_tfidf))
+
 
 encoder = Model(ae.input, ae.get_layer('bottleneck').output)
 
-Zenc = encoder.predict(X_train_tfidf)
-Renc = ae.predict(X_train_tfidf)
+encoder.compile(
+    loss='binary_crossentropy',
+    optimizer='adam',
+    metrics=['accuracy'])
 
+encoder.fit(X_train_tfidf, y_train,
+            nb_epoch=10,
+            batch_size=128,
+            shuffle=True,
+            validation_data=(X_test_tfidf, y_test))
 
-
+print("Autoencoder")
+scores = encoder.evaluate(X_test_tfidf, y_test, verbose=1)
+print("Accuracy: ", scores[1])
