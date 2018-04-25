@@ -24,7 +24,6 @@ from keras.optimizers import Adam
 
 
 # Import Data
-# Downloaded from http://www.nltk.org/nltk_data/
 moviedir = 'data/movie_reviews/txt_sentoken/'
 reviews = load_files(moviedir, shuffle=True)
 
@@ -84,8 +83,9 @@ random_search = RandomizedSearchCV(clf, param_distributions=parameters_rand,
                                    n_jobs=-1)
 
 random_search.fit(X_train_pca, y_train)
-
+print(random_search.cv_results_)
 predicted = random_search.predict(X_test_pca)
+
 
 print("PCA with random forest")
 print("Accuracy: {}".format(np.mean(predicted == y_test)))
