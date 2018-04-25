@@ -47,21 +47,27 @@ X_test_count = count_vect.transform(X_test)
 X_test_tfidf = tfidf_transformer.transform(X_test_count)
 X_test_pca = pca.transform(X_test_tfidf)
 
+clf = RandomForestClassifier()
 
-params = {
-    "n_estimators": 1155,
-    "max_depth": 10,
-    "max_features": 1,
-    "min_samples_split": 6,
-    "min_samples_leaf": 2,
-    "bootstrap": True,
-    "criterion":  "entropy"
+parameters_rand = {
+    "n_estimators": sp_randint(300, 2000),
+    "max_depth": [3, None],
+    "max_features": sp_randint(1, 11),
+    "min_samples_split": sp_randint(2, 11),
+    "min_samples_leaf": sp_randint(1, 11),
+    "bootstrap": [True, False],
+    "criterion": ["gini", "entropy"]
 }
 
-clf = RandomForestClassifier(**params)
+# run randomized search
+# Accuracy should be comparable to grid search, but runs much much faster
+n_iter_search = 20
+random_search = RandomizedSearchCV(clf, param_distributions=parameters_rand,
+                                   n_iter=n_iter_search,
+                                   n_jobs=-1)
 
-clf.fit(X_train_pca, y_train)
-predicted = clf.predict(X_test_pca)
+random_search.fit(X_train_pca, y_train)
+predicted = random_search.predict(X_test_pca)
 
 print("PCA with random forest")
 print("Accuracy: {}".format(np.mean(predicted == y_test)))
@@ -82,7 +88,6 @@ print(len(false_positives))
 print(false_positives[0])
 print("\n")
 print(true_positives[0])
-quit()
 
 # AutoEncoder
 input_shape = X_train_tfidf.shape[1]
