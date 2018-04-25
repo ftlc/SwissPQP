@@ -18,6 +18,11 @@ from sklearn.model_selection import RandomizedSearchCV
 
 from sklearn import metrics
 
+
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input
+from keras.optimizers import Adam
+
 resumes = load_files('actingAndManagerResumes/', shuffle=True)
 
 # Split remainder into training and testing
@@ -42,25 +47,41 @@ X_test_count = count_vect.transform(X_test)
 X_test_tfidf = tfidf_transformer.transform(X_test_count)
 X_test_pca = pca.transform(X_test_tfidf)
 
-params = {'bootstrap': False,
-    'criterion': 'entropy',
-    'max_depth': 3,
-    'max_features': 5,
-    'min_samples_leaf': 1,
-    'min_samples_split': 2,
-    'n_estimators': 457}
+
+params = {
+    "n_estimators": 1155,
+    "max_depth": 10,
+    "max_features": 1,
+    "min_samples_split": 6,
+    "min_samples_leaf": 2,
+    "bootstrap": True,
+    "criterion":  "entropy"
+}
 
 clf = RandomForestClassifier(**params)
 
 clf.fit(X_train_pca, y_train)
 predicted = clf.predict(X_test_pca)
 
-
 print("PCA with random forest")
 print("Accuracy: {}".format(np.mean(predicted == y_test)))
 tn, fp , fn, tp = metrics.confusion_matrix(y_test, predicted).ravel()
 print("True negatives:{0}\nFalse Positives:{1}\nFalse Negatives:{2}\nTrue Positives:{3}".format(tn, fp, fn, tp))
 print("F1 score:{}".format(metrics.f1_score(y_test, predicted)))
+
+false_positives = []
+true_positives = []
+for predicted_label, actual_label, example in zip(predicted, y_test, X_test):
+    #print("{0}, {1}".format(predicted_label, actual_label))
+    if predicted_label == 1 and actual_label == 0:
+        #print("Found one!")
+        false_positives += [example]
+    elif predicted_label == 1 and actual_label == 1:
+        true_positives += [example]
+print(len(false_positives))
+print(false_positives[0])
+print("\n")
+print(true_positives[0])
 quit()
 
 # AutoEncoder
