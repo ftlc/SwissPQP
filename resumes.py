@@ -1,7 +1,6 @@
-# Trying to train a model to distinguish movie industry resumes from 
+# Trying to train a model to distinguish movie industry resumes from
 # movie reviews
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from sklearn.datasets import load_files
@@ -50,7 +49,6 @@ params = {
     'n_estimators': 457
 }
 
-
 clf = RandomForestClassifier(**params)
 clf.fit(X_train_svd, y_train)
 predicted = clf.predict(X_test_svd)
@@ -64,4 +62,3 @@ f1 = f1_score(y_test, predicted)
 
 print("Confusion Matrix: \n{}".format(confusion_matrix(y_test, predicted)))
 print("F1 Score: {}".format(f1))
-
